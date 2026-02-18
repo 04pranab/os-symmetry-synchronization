@@ -1,0 +1,178 @@
+# 01 — Formal Model
+
+## The Scheduling Space as a Symmetric Group
+
+This document establishes the mathematical foundation for the project. All subsequent theory files and source code build on the definitions made here.
+
+---
+
+## 1. Processes and Schedules
+
+Let `P = {1, 2, ..., n}` be a finite set of `n` concurrent processes. We assume processes are distinguishable and that at any given scheduling epoch, each process is assigned a unique execution slot.
+
+**Definition 1.1 (Schedule).** A *schedule* is a bijection
+
+```
+σ : P → P
+```
+
+that assigns to each process a unique position in the execution order. If `σ(i) = k`, process `i` is scheduled at position `k`.
+
+Since `σ` is a bijection on a finite set, it is a **permutation** of `P`.
+
+---
+
+## 2. The Symmetric Group S_n
+
+**Definition 2.1 (Symmetric Group).** The *symmetric group on n elements*, denoted `S_n`, is the set of all permutations of `P = {1, ..., n}` equipped with the binary operation of **function composition**.
+
+```
+S_n = { σ : P → P | σ is a bijection }
+```
+
+The group operation is:
+
+```
+(σ ∘ τ)(i) = σ(τ(i))     for all i ∈ P
+```
+
+**Proposition 2.2.** `(S_n, ∘)` is a group. Specifically:
+
+- **Closure:** composition of two bijections is a bijection.
+- **Associativity:** function composition is associative.
+- **Identity:** the identity permutation `e` where `e(i) = i` for all `i` is the identity element.
+- **Inverses:** every bijection has a unique inverse bijection.
+
+**Proposition 2.3.** `|S_n| = n!`
+
+*Proof.* A bijection from `P` to `P` is determined by choosing where to send `1` (n choices), then `2` (n−1 remaining choices), and so on. This gives `n × (n−1) × ... × 1 = n!` distinct permutations. ∎
+
+---
+
+## 3. Notation
+
+We write permutations in two standard notations throughout this project.
+
+**Two-line notation:**
+
+```
+σ = ( 1   2   3 )
+    ( 2   3   1 )
+```
+
+means `σ(1) = 2`, `σ(2) = 3`, `σ(3) = 1`.
+
+**Cycle notation:**
+
+The same permutation is written `σ = (1 2 3)`, meaning `1 → 2 → 3 → 1`.
+
+The identity permutation `e` sends every element to itself and is written `()` or `e`.
+
+---
+
+## 4. Subgroups
+
+Not every subset of `S_n` is a group under composition. We are specifically interested in subsets that are.
+
+**Definition 4.1 (Subgroup).** A non-empty subset `H ⊆ S_n` is a *subgroup* of `S_n`, written `H ≤ S_n`, if:
+
+1. `e ∈ H` (contains identity)
+2. `σ, τ ∈ H ⟹ σ ∘ τ ∈ H` (closed under composition)
+3. `σ ∈ H ⟹ σ⁻¹ ∈ H` (closed under inverses)
+
+**Theorem 4.2 (Lagrange).** If `H ≤ S_n`, then `|H|` divides `|S_n| = n!`.
+
+Lagrange's theorem is a key sanity check in the computational verification — every subgroup we compute must have order dividing `n!`.
+
+---
+
+## 5. Group Actions
+
+Permutations do not only act on positions — they can act on any set.
+
+**Definition 5.1 (Group Action).** A *group action* of `S_n` on a set `X` is a map
+
+```
+· : S_n × X → X,    (σ, x) ↦ σ · x
+```
+
+satisfying:
+
+1. `e · x = x` for all `x ∈ X`
+2. `(σ ∘ τ) · x = σ · (τ · x)` for all `σ, τ ∈ S_n`, `x ∈ X`
+
+In this project, `S_n` acts on the set of processes `P` in the natural way: `σ · i = σ(i)`.
+
+**Definition 5.2 (Orbit).** The *orbit* of an element `x ∈ X` under the action of `S_n` is:
+
+```
+Orb(x) = { σ · x | σ ∈ S_n }
+```
+
+**Definition 5.3 (Stabilizer).** The *stabilizer* of `x ∈ X` is:
+
+```
+Stab(x) = { σ ∈ S_n | σ · x = x }
+```
+
+The stabilizer is the set of all permutations that leave `x` fixed. It is always a subgroup of `S_n`.
+
+**Theorem 5.4 (Orbit-Stabilizer Theorem).** For any `x ∈ X`:
+
+```
+|S_n| = |Orb(x)| × |Stab(x)|
+```
+
+This is used directly in Claim 2 to verify the order of the stabilizer subgroup.
+
+---
+
+## 6. Mapping to Synchronization
+
+The table below summarises how each OS concept maps to an algebraic object. The subsequent theory files develop each row in detail.
+
+| OS Concept            | Algebraic Object            | File                              |
+|-----------------------|-----------------------------|-----------------------------------|
+| All schedules         | `S_n`                       | this document                     |
+| Mutual exclusion      | Stabilizer subgroup `Stab(x)` | `02_mutual_exclusion_theorem.md`  |
+| Round-robin scheduling | Cyclic subgroup `⟨c⟩ ≅ Z_n` | `03_cyclic_scheduling.md`         |
+| Deadlock              | Identity element `e`        | `04_deadlock_as_trivial_action.md`|
+
+---
+
+## 7. A Small Example — S_3
+
+To make things concrete, consider `n = 3`, so `P = {1, 2, 3}`.
+
+The six elements of `S_3` are:
+
+```
+e   = ()          →  [1, 2, 3]
+σ₁  = (1 2)       →  [2, 1, 3]
+σ₂  = (1 3)       →  [3, 2, 1]
+σ₃  = (2 3)       →  [1, 3, 2]
+σ₄  = (1 2 3)     →  [2, 3, 1]
+σ₅  = (1 3 2)     →  [3, 1, 2]
+```
+
+The stabilizer of process `1` is:
+
+```
+Stab(1) = { σ ∈ S_3 | σ(1) = 1 } = { e, σ₃ } = { (), (2 3) }
+```
+
+which has order `2 = (3-1)!`, consistent with the Orbit-Stabilizer theorem: `6 = 3 × 2`.
+
+The cyclic subgroup generated by the 3-cycle `c = (1 2 3)` is:
+
+```
+⟨c⟩ = { e, (1 2 3), (1 3 2) }
+```
+
+which has order `3`, isomorphic to `Z_3`.
+
+These two examples are the concrete instances of Claims 2 and 3 for `n = 3`. The source file `src/permutations.py` reproduces them computationally.
+
+---
+
+*Next: [02 — Mutual Exclusion as a Stabilizer Subgroup](02_mutual_exclusion_theorem.md)*
