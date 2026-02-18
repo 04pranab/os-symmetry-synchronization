@@ -119,7 +119,7 @@ cd os-symmetry-synchronization
 pip install -r requirements.txt
 ```
 
-Dependencies: `numpy`, `matplotlib`, `jupyter`. No computer algebra system is used — all group-theoretic operations are implemented from scratch.
+Dependencies: `numpy`, `matplotlib`, `jupyter`, `networkx`, `sympy`. No computer algebra system is used — all group-theoretic operations are implemented from scratch.
 
 ---
 
