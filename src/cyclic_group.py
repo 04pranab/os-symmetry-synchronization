@@ -16,7 +16,7 @@ Depends on: permutations.py
 """
 
 import math
-from src.permutations import (
+from permutations import (
     generate_Sn,
     identity,
     compose,
