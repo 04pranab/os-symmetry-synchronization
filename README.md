@@ -24,7 +24,7 @@ A computational and structural study of operating system synchronization modeled
 - [Limitations](#limitations)
 - [References](#references)
 - [License](#license)
-
+- [Manuscript Status](#manuscript-status)
 ---
 
 ## Background
@@ -179,6 +179,13 @@ All four claims verified computationally for `n ∈ {2, 3, 4, 5, 6}`:
 
 - Silberschatz and Galvin, *“Operating System Concepts”*, Wiley-India, International Student Version, 8th Ed., 2010
 - Joseph A. Gallian, Contemporary Abstract Algebra, Cengage Learning , 2017, 8th Edition.
+
+---
+
+## Manuscript Status
+
+A full manuscript corresponding to this repository has been prepared.
+arXiv submission is planned and pending endorsement.
 
 ---
 
